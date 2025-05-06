@@ -1,0 +1,51 @@
+# Compiled binary files
+bin/
+obj/
+*.exe
+*.dll
+
+# Visual Studio settings
+.vs/
+*.suo
+*.user
+
+# Build outputs
+wwwroot/
+dist/
+out/
+
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Logs and temporary files
+logs/
+*.log
+tmp/
+temp/
+
+# Environment & secret files
+.env
+.env.local
+.env.development
+appsettings.Development.json
+appsettings.Local.json
+
+# Database files
+*.mdf
+*.ldb
+sqlite.db
+
+# Test & coverage reports
+TestResults/
+coverage/
+
+# Generated API documentation
+swagger/
+swagger_output.json
+
+# IDE settings
+.idea/
+.vscode/
+*.code-workspace
