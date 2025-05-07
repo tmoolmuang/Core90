@@ -22,7 +22,15 @@
 
 //app.Run();
 
+using CoreApi.Models;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
+
+//----------
+builder.Services.AddDbContext<SupportTestContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SupportTestDB")));
+//----------
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
