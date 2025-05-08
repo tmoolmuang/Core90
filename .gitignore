@@ -49,3 +49,25 @@ swagger_output.json
 .idea/
 .vscode/
 *.code-workspace
+
+# Vite build outputs
+.vite/
+
+# React/Vite specific dependencies
+node_modules/
+dist/
+out/
+.vite-cache/
+
+# Vite dev server & environment settings
+.env.production
+.env.development.local
+
+# Temporary & debugging files
+*.log
+temp/
+tmp/
+
+# Optional: If using TypeScript
+*.tsbuildinfo
+
