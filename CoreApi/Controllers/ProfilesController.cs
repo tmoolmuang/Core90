@@ -1,11 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CoreApi.Models;
+
+//Posing on EF core, there's no need to fill all the properties of the object.
+//{
+//  "userName": "string",
+//  "firstName": "string",
+//  "middleName": "string",
+//  "lastName": "string",
+//  "active": true,
+//  "email": "string"
+//}
 
 namespace CoreApi.Controllers
 {

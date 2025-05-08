@@ -5,6 +5,7 @@ using Microsoft.Data.SqlClient;
 using Dapper;
 
 //table aspnet_Applications does not have a primary key, we will use Dapper for direct SQL execution instead of EF.
+//All object properties needs to be passed in when posting.
 
 namespace CoreApi.Controllers {
     [Route("api/[controller]")]
