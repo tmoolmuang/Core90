@@ -6,6 +6,13 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Services.AddCors(options => {
+    options.AddPolicy("AllowReactApp",
+        policy => policy.WithOrigins("https://localhost:56074")
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
+
 var app = builder.Build();
 
 app.UseDefaultFiles();
@@ -25,4 +32,7 @@ app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
 
+app.UseCors("AllowReactApp");
+
 app.Run();
+
