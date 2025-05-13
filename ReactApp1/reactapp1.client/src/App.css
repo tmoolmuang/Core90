@@ -10,7 +10,7 @@ th, td {
     padding-right: 1rem;
 }
 
-/*.modal {
+.app-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -23,29 +23,30 @@ th, td {
     z-index: 1000;
 }
 
-.modal-content {
+.app-modal-content {
     background-color: white;
     padding: 2rem;
     border-radius: 8px;
-    min-width: 300px;
-}
-*/
-/*.modal {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
+    width: 500px !important;
+    box-sizing: border-box;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
-.modal-content {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
+.app-modal-input {
+    display: block;
     width: 100%;
-    max-width: 400px;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    font-size: 1rem;
 }
-*/
 
+.app-modal-input-readonly {
+    background-color: #f0f0f0;
+}
+
+.app-modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}

@@ -70,24 +70,8 @@ function ApplicationEditModal({ mode = "edit", app, closeModal, setApplications 
     };
 
     return (
-        <div style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0,0,0,0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000
-        }}>
-            <div style={{
-                backgroundColor: "white",
-                padding: "2rem",
-                borderRadius: "8px",
-                minWidth: "300px"
-            }}>
+        <div className="app-modal-overlay">
+            <div className="app-modal-content">
                 <h2>{isInsert ? "Add New Application" : "Edit Application"}</h2>
 
                 <label htmlFor="applicationName">Application Name:</label>
@@ -97,8 +81,9 @@ function ApplicationEditModal({ mode = "edit", app, closeModal, setApplications 
                     name="applicationName"
                     value={formData.applicationName}
                     onChange={handleChange}
-                    style={{ display: "block", width: "100%", marginBottom: "1rem" }}
-                />
+                    className="app-modal-input"
+                    autoComplete="off"
+               />
 
                 <label htmlFor="loweredApplicationName">Lowered Application Name:</label>
                 <input
@@ -108,8 +93,9 @@ function ApplicationEditModal({ mode = "edit", app, closeModal, setApplications 
                     value={formData.loweredApplicationName}
                     onChange={handleChange}
                     readOnly
-                    style={{ display: "block", width: "100%", marginBottom: "1rem", backgroundColor: "#f0f0f0" }}
-                />
+                    className="app-modal-input app-modal-input-readonly"
+                    autoComplete="off"
+              />
 
                 <label htmlFor="description">Description:</label>
                 <input
@@ -118,10 +104,11 @@ function ApplicationEditModal({ mode = "edit", app, closeModal, setApplications 
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
-                    style={{ display: "block", width: "100%", marginBottom: "1rem" }}
-                />
+                    className="app-modal-input"
+                    autoComplete="off"
+             />
 
-                <div style={{ display: "flex", gap: "1rem", justifyContent: "flex-end" }}>
+                <div className="app-modal-actions">
                     <button onClick={handleSubmit}>
                         {isInsert ? "Insert" : "Update"}
                     </button>
