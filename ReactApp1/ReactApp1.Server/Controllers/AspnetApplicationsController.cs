@@ -15,7 +15,7 @@ namespace CoreApi.Controllers {
 
         public AspnetApplicationsController(IConfiguration configuration) {
             IConfiguration config = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            _connectionString = config.GetConnectionString("SupportTestDB") ?? throw new InvalidOperationException("Connection string 'SupportTestDB' is not configured.");
+            _connectionString = config.GetConnectionString("SupportDB") ?? throw new InvalidOperationException("Connection string 'SupportDB' is not configured.");
         }
 
         // GET: api/AspnetApplications

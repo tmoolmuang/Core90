@@ -109,10 +109,10 @@ function ApplicationEditModal({ mode = "edit", app, closeModal, setApplications 
              />
 
                 <div className="app-modal-actions">
-                    <button onClick={handleSubmit}>
+                    <button className="btn btn-primary" onClick={handleSubmit}>
                         {isInsert ? "Insert" : "Update"}
                     </button>
-                    <button onClick={closeModal}>Cancel</button>
+                    <button className="btn btn-primary" onClick={closeModal}>Cancel</button>
                 </div>
             </div>
         </div>

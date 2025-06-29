@@ -35,7 +35,7 @@ function ApplicationList() {
         <div>
             <h1>Application List</h1>
 
-            <button onClick={handleAddNew} style={{ marginBottom: "1rem" }}>
+            <button className="btn btn-primary" onClick={handleAddNew} style={{ marginBottom: "1rem" }}>
                 Add New Application
             </button>
 
@@ -57,7 +57,7 @@ function ApplicationList() {
                             <td>{app.loweredApplicationName ?? "N/A"}</td>
                             <td>{app.description ?? "N/A"}</td>
                             <td>
-                                <button onClick={() => handleEditClick(app)}>Edit</button>
+                                <button className="btn btn-primary" onClick={() => handleEditClick(app)}>Edit</button>
                             </td>
                         </tr>
                     ))}
