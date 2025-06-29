@@ -1,130 +1,89 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ReactApp1.Server.Models;
 using Microsoft.Data.SqlClient;
 using Dapper;
+using ReactApp1.Server.Models;
 
-//table aspnet_Applications does not have a primary key, we will use Dapper for direct SQL execution instead of EF.
-//All object properties needs to be passed in when posting.
-
-namespace CoreApi.Controllers {
+namespace ReactApp1.Server.Controllers {
     [Route("api/[controller]")]
     [ApiController]
     public class AspnetApplicationsController : ControllerBase {
-        private readonly string _connectionString;
+        private readonly IConfiguration _configuration;
 
         public AspnetApplicationsController(IConfiguration configuration) {
-            IConfiguration config = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            _connectionString = config.GetConnectionString("SupportDB") ?? throw new InvalidOperationException("Connection string 'SupportDB' is not configured.");
+            _configuration = configuration;
+        }
+
+        private SqlConnection GetConnection() {
+            return new SqlConnection(_configuration.GetConnectionString("SupportDB"));
         }
 
         // GET: api/AspnetApplications
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AspnetApplication>>> GetAspnetApplications() {
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            var query = "SELECT ApplicationId, ApplicationName, LoweredApplicationName, Description FROM aspnet_Applications";
-
-            var applications = await connection.QueryAsync<AspnetApplication>(query);
-
-            return Ok(applications);
+        public async Task<ActionResult<IEnumerable<AspnetApplication>>> GetAll() {
+            using var connection = GetConnection();
+            var apps = await connection.QueryAsync<AspnetApplication>("SELECT * FROM aspnet_Applications");
+            return Ok(apps);
         }
 
-        // GET: api/AspnetApplications/00000000-0000-0000-0000-000000000000
-        [HttpGet("{ApplicationId}")]
-        public async Task<ActionResult<AspnetApplication>> GetAspnetApplication(string ApplicationId) {
-            if (!Guid.TryParse(ApplicationId, out Guid appId))
-                return BadRequest("Invalid GUID format.");
+        // GET: api/AspnetApplications/{id}
+        [HttpGet("{id}")]
+        public async Task<ActionResult<AspnetApplication>> GetById(Guid id) {
+            using var connection = GetConnection();
+            var sql = "SELECT * FROM aspnet_Applications WHERE ApplicationId = @Id";
+            var app = await connection.QueryFirstOrDefaultAsync<AspnetApplication>(sql, new { Id = id });
 
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
+            if (app == null)
+                return NotFound();
 
-            var query = "SELECT * FROM aspnet_Applications WHERE ApplicationId = @ApplicationId";
-            var application = await connection.QuerySingleOrDefaultAsync<AspnetApplication>(query, new { ApplicationId = appId });
-
-            return application is null ? NotFound() : Ok(application);
-        }
-
-        // PUT: api/AspnetApplications/00000000-0000-0000-0000-000000000000
-        [HttpPut("{ApplicationId}")]
-        public async Task<IActionResult> UpdateApplication(string ApplicationId, AspnetApplication updatedApp) {
-            if (!Guid.TryParse(ApplicationId, out Guid appId) || appId != updatedApp.ApplicationId)
-                return BadRequest("Invalid ApplicationId.");
-
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            var exists = await connection.QuerySingleOrDefaultAsync<bool>(
-                "SELECT COUNT(1) FROM aspnet_Applications WHERE ApplicationId = @ApplicationId",
-                new { updatedApp.ApplicationId });
-
-            if (!exists) return NotFound("ApplicationId not found.");
-
-            var query = @"  UPDATE aspnet_Applications
-                            SET LoweredApplicationName = @LoweredApplicationName,
-                                Description = @Description,
-                                ApplicationName = @ApplicationName
-                            WHERE ApplicationId = @ApplicationId";
-
-            await connection.ExecuteAsync(query, new {
-                updatedApp.LoweredApplicationName,
-                updatedApp.Description,
-                updatedApp.ApplicationName,
-                updatedApp.ApplicationId
-            });
-
-            return NoContent();
+            return Ok(app);
         }
 
         // POST: api/AspnetApplications
         [HttpPost]
-        public async Task<IActionResult> CreateApplication([FromBody] AspnetApplication app) {
-            if (app == null) return BadRequest("Invalid application data.");
+        public async Task<ActionResult> Create(AspnetApplication app) {
+            using var connection = GetConnection();
+            var sql = @"
+                INSERT INTO aspnet_Applications (ApplicationName, LoweredApplicationName, ApplicationId, Description)
+                VALUES (@ApplicationName, @LoweredApplicationName, @ApplicationId, @Description)";
 
-            app.ApplicationId = app.ApplicationId == Guid.Empty ? Guid.NewGuid() : app.ApplicationId;
+            await connection.ExecuteAsync(sql, app);
 
-            var sql = @"INSERT INTO aspnet_Applications (ApplicationName, LoweredApplicationName, ApplicationId, Description)
-                        VALUES (@ApplicationName, @LoweredApplicationName, @ApplicationId, @Description)";
-
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            var parameters = new {
-                app.ApplicationName,
-                app.LoweredApplicationName,
-                app.ApplicationId,
-                app.Description
-            };
-
-            try {
-                var affectedRows = await connection.ExecuteAsync(sql, parameters);
-                return affectedRows > 0
-                    ? Ok(new { message = "Application created successfully.", applicationId = app.ApplicationId })
-                    : StatusCode(500, "Failed to insert application.");
-            }
-            catch (SqlException ex) {
-                return StatusCode(500, $"Database error: {ex.Message}");
-            }
-            catch (Exception ex) {
-                return StatusCode(500, $"Unexpected error: {ex.Message}");
-            }
+            return Ok();
         }
 
-        // DELETE: api/AspnetApplications/00000000-0000-0000-0000-000000000000
-        [HttpDelete("{ApplicationId}")]
-        public async Task<IActionResult> DeleteApplication(string ApplicationId) {
-            if (!Guid.TryParse(ApplicationId, out Guid appId))
-                return BadRequest("Invalid GUID format.");
+        // PUT: api/AspnetApplications/{id}
+        [HttpPut("{id}")]
+        public async Task<ActionResult> Update(Guid id, AspnetApplication app) {
+            if (id != app.ApplicationId)
+                return BadRequest("ID mismatch.");
 
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
+            using var connection = GetConnection();
+            var sql = @"
+                UPDATE aspnet_Applications
+                SET ApplicationName = @ApplicationName,
+                    LoweredApplicationName = @LoweredApplicationName,
+                    Description = @Description
+                WHERE ApplicationId = @ApplicationId";
 
-            var query = "DELETE FROM aspnet_Applications WHERE ApplicationId = @ApplicationId";
+            var rows = await connection.ExecuteAsync(sql, app);
 
-            var affectedRows = await connection.ExecuteAsync(query, new { ApplicationId = appId });
+            if (rows == 0)
+                return NotFound();
 
-            return affectedRows > 0 ? NoContent() : NotFound("Application not found.");
+            return Ok();
+        }
+
+        // DELETE: api/AspnetApplications/{id}
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(Guid id) {
+            using var connection = GetConnection();
+            var sql = "DELETE FROM aspnet_Applications WHERE ApplicationId = @Id";
+            var rows = await connection.ExecuteAsync(sql, new { Id = id });
+
+            if (rows == 0)
+                return NotFound();
+
+            return Ok();
         }
     }
 }
