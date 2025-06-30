@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import TableManager from './TableManager';
+import SearchPage from './SearchPage';
 
 const entities = [
     {
@@ -20,7 +21,7 @@ const entities = [
     {
         name: 'AspnetUsersInRole',
         columns: ['userId', 'roleId'],
-        idField: '', // No formal PK, handled in TableManager
+        idField: '',
     },
     {
         name: 'LuPermissions',
@@ -37,34 +38,40 @@ const entities = [
         columns: ['profileId', 'userName', 'firstName', 'middleName', 'lastName', 'active', 'email', 'oneHealthcareUuid'],
         idField: 'profileId',
     },
+    {
+        name: 'UserSearch',
+        isSearch: true,
+    },
 ];
 
 export default function AdminDashboard() {
-    const [selectedIndex, setSelectedIndex] = useState(0);
-    const { name, columns, idField } = entities[selectedIndex];
+    const [selectedEntity, setSelectedEntity] = useState(entities[0]);
 
     return (
-        <div className="d-flex vh-100 small">
-            <nav className="border-end p-2" style={{ width: 200, fontSize: '0.85rem' }}>
-                <h6 className="text-center mb-3">Admin Tables</h6>
-                <ul className="nav flex-column">
-                    {entities.map((entity, i) => (
-                        <li key={entity.name} className="nav-item mb-1">
-                            <button
-                                className={`nav-link btn btn-outline-primary btn-sm w-100 text-start ${i === selectedIndex ? 'active' : ''}`}
-                                style={{ fontSize: '0.75rem', padding: '0.15rem 0.4rem' }}
-                                onClick={() => setSelectedIndex(i)}
-                            >
-                                {entity.name}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </nav>
-
-            <main className="flex-grow-1 p-2 overflow-auto" style={{ fontSize: '0.85rem' }}>
-                <TableManager entityName={name} columns={columns} idField={idField} />
-            </main>
+        <div className="d-flex vh-100">
+            <div className="bg-light p-3" style={{ minWidth: '200px' }}>
+                <h5>Admin Menu</h5>
+                {entities.map((entity) => (
+                    <button
+                        key={entity.name}
+                        className="btn btn-sm btn-outline-primary w-100 mb-2"
+                        onClick={() => setSelectedEntity(entity)}
+                    >
+                        {entity.isSearch ? 'User Search' : entity.name}
+                    </button>
+                ))}
+            </div>
+            <div className="flex-fill p-3 overflow-auto">
+                {selectedEntity.isSearch ? (
+                    <SearchPage />
+                ) : (
+                    <TableManager
+                        entityName={selectedEntity.name}
+                        columns={selectedEntity.columns}
+                        idField={selectedEntity.idField}
+                    />
+                )}
+            </div>
         </div>
     );
 }
