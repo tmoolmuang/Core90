@@ -4,7 +4,7 @@ import apiClient from '../api/apiClient';
 export default function SearchPage() {
     const [applications, setApplications] = useState([]);
     const [usernames, setUsernames] = useState([]);
-    const [filters, setFilters] = useState({ applicationId: '', userName: '', lastName: '', firstName: '' });
+    const [filters, setFilters] = useState({ ApplicationId: '', UserName: '', LastName: '', FirstName: '' });
     const [results, setResults] = useState([]);
 
     useEffect(() => {
@@ -12,13 +12,13 @@ export default function SearchPage() {
     }, []);
 
     useEffect(() => {
-        if (filters.applicationId) {
-            apiClient.get('/AspnetUsers', { params: { applicationId: filters.applicationId } })
+        if (filters.ApplicationId) {
+            apiClient.get('/AspnetUsers', { params: { ApplicationId: filters.ApplicationId } })
                 .then(res => setUsernames(res.data));
         } else {
             setUsernames([]);
         }
-    }, [filters.applicationId]);
+    }, [filters.ApplicationId]);
 
     const handleSearch = () => {
         apiClient.get('/UserSearch', { params: filters }).then(res => setResults(res.data));
@@ -32,8 +32,8 @@ export default function SearchPage() {
                     <label>Application</label>
                     <select
                         className="form-select form-select-sm"
-                        value={filters.applicationId}
-                        onChange={e => setFilters(f => ({ ...f, applicationId: e.target.value }))}
+                        value={filters.ApplicationId}
+                        onChange={e => setFilters(f => ({ ...f, ApplicationId: e.target.value }))}
                     >
                         <option value="">-- All --</option>
                         {applications.map(app => (
@@ -45,8 +45,8 @@ export default function SearchPage() {
                     <label>UserName</label>
                     <select
                         className="form-select form-select-sm"
-                        value={filters.userName}
-                        onChange={e => setFilters(f => ({ ...f, userName: e.target.value }))}
+                        value={filters.UserName}
+                        onChange={e => setFilters(f => ({ ...f, UserName: e.target.value }))}
                     >
                         <option value="">-- All --</option>
                         {usernames.map(user => (
@@ -58,16 +58,16 @@ export default function SearchPage() {
                     <label>LastName</label>
                     <input
                         className="form-control form-control-sm"
-                        value={filters.lastName}
-                        onChange={e => setFilters(f => ({ ...f, lastName: e.target.value }))}
+                        value={filters.LastName}
+                        onChange={e => setFilters(f => ({ ...f, LastName: e.target.value }))}
                     />
                 </div>
                 <div className="col">
                     <label>FirstName</label>
                     <input
                         className="form-control form-control-sm"
-                        value={filters.firstName}
-                        onChange={e => setFilters(f => ({ ...f, firstName: e.target.value }))}
+                        value={filters.FirstName}
+                        onChange={e => setFilters(f => ({ ...f, FirstName: e.target.value }))}
                     />
                 </div>
                 <div className="col d-flex align-items-end">
