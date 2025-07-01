@@ -1,27 +1,30 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/apiClient';
 
 export default function SearchPage() {
+    const navigate = useNavigate();
+
     const [applications, setApplications] = useState([]);
-    const [usernames, setUsernames] = useState([]);
-    const [filters, setFilters] = useState({ ApplicationId: '', UserName: '', LastName: '', FirstName: '' });
+    const [filters, setFilters] = useState({
+        ApplicationId: '',
+        UserName: '',
+        LastName: '',
+        FirstName: '',
+    });
     const [results, setResults] = useState([]);
 
     useEffect(() => {
         apiClient.get('/AspnetApplications').then(res => setApplications(res.data));
     }, []);
 
-    useEffect(() => {
-        if (filters.ApplicationId) {
-            apiClient.get('/AspnetUsers', { params: { ApplicationId: filters.ApplicationId } })
-                .then(res => setUsernames(res.data));
-        } else {
-            setUsernames([]);
-        }
-    }, [filters.ApplicationId]);
-
     const handleSearch = () => {
         apiClient.get('/UserSearch', { params: filters }).then(res => setResults(res.data));
+    };
+
+    const handleEditClick = (userId) => {
+        // Navigate to user detail page with userId in URL
+        navigate(`/userdetail/${userId}`);
     };
 
     return (
@@ -37,23 +40,22 @@ export default function SearchPage() {
                     >
                         <option value="">-- All --</option>
                         {applications.map(app => (
-                            <option key={app.applicationId} value={app.applicationId}>{app.applicationName}</option>
+                            <option key={app.ApplicationId} value={app.ApplicationId}>
+                                {app.ApplicationName}
+                            </option>
                         ))}
                     </select>
                 </div>
+
                 <div className="col">
                     <label>UserName</label>
-                    <select
-                        className="form-select form-select-sm"
+                    <input
+                        className="form-control form-control-sm"
                         value={filters.UserName}
                         onChange={e => setFilters(f => ({ ...f, UserName: e.target.value }))}
-                    >
-                        <option value="">-- All --</option>
-                        {usernames.map(user => (
-                            <option key={user.userId} value={user.userName}>{user.userName}</option>
-                        ))}
-                    </select>
+                    />
                 </div>
+
                 <div className="col">
                     <label>LastName</label>
                     <input
@@ -62,6 +64,7 @@ export default function SearchPage() {
                         onChange={e => setFilters(f => ({ ...f, LastName: e.target.value }))}
                     />
                 </div>
+
                 <div className="col">
                     <label>FirstName</label>
                     <input
@@ -70,8 +73,11 @@ export default function SearchPage() {
                         onChange={e => setFilters(f => ({ ...f, FirstName: e.target.value }))}
                     />
                 </div>
+
                 <div className="col d-flex align-items-end">
-                    <button className="btn btn-sm btn-primary w-100" onClick={handleSearch}>Search</button>
+                    <button className="btn btn-sm btn-primary w-100" onClick={handleSearch}>
+                        Search
+                    </button>
                 </div>
             </div>
 
@@ -87,14 +93,21 @@ export default function SearchPage() {
                     </tr>
                 </thead>
                 <tbody>
-                    {results.map(r => (
-                        <tr key={r.UserId}>
+                    {results.map((r, index) => (
+                        <tr key={`${r.UserId}_${index}`}>
                             <td>{r.ApplicationName}</td>
                             <td>{r.UserName}</td>
                             <td>{r.LastName}</td>
                             <td>{r.FirstName}</td>
                             <td>{r.Active ? 'Yes' : 'No'}</td>
-                            <td><button className="btn btn-sm btn-outline-secondary">Edit</button></td>
+                            <td>
+                                <button
+                                    className="btn btn-sm btn-outline-secondary"
+                                    onClick={() => handleEditClick(r.UserId)}
+                                >
+                                    Edit
+                                </button>
+                            </td>
                         </tr>
                     ))}
                 </tbody>

@@ -8,29 +8,25 @@ export default function TableManager({ entityName, columns, idField }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const generateRowKey = (item, columns) => {
-        return columns.map(col => item[col] ?? '').join('_');
-    };
-
     useEffect(() => {
+        const fetchItems = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const res = await apiClient.get(`/${entityName}`);
+                setItems(res.data);
+            } catch (err) {
+                setError(err.message || 'Failed to load');
+            } finally {
+                setLoading(false);
+            }
+        };
+
         setItems([]);
         setEditingItem(null);
         setNewItem({});
         fetchItems();
     }, [entityName]);
-
-    const fetchItems = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const res = await apiClient.get(`/${entityName}`);
-            setItems(res.data);
-        } catch (err) {
-            setError(err.message || 'Failed to load');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleInputChange = (e, setter) => {
         const { name, value, type, checked } = e.target;
@@ -44,7 +40,8 @@ export default function TableManager({ entityName, columns, idField }) {
         try {
             await apiClient.post(`/${entityName}`, newItem);
             setNewItem({});
-            fetchItems();
+            const res = await apiClient.get(`/${entityName}`);
+            setItems(res.data);
         } catch (err) {
             alert('Add failed: ' + err.message);
         }
@@ -58,7 +55,8 @@ export default function TableManager({ entityName, columns, idField }) {
         try {
             await apiClient.put(`/${entityName}/${editingItem[idField]}`, editingItem);
             setEditingItem(null);
-            fetchItems();
+            const res = await apiClient.get(`/${entityName}`);
+            setItems(res.data);
         } catch (err) {
             alert('Update failed: ' + err.message);
         }
@@ -68,7 +66,8 @@ export default function TableManager({ entityName, columns, idField }) {
         if (!window.confirm('Delete this item?')) return;
         try {
             await apiClient.delete(`/${entityName}/${id}`);
-            fetchItems();
+            const res = await apiClient.get(`/${entityName}`);
+            setItems(res.data);
         } catch (err) {
             alert('Delete failed: ' + err.message);
         }
@@ -88,12 +87,12 @@ export default function TableManager({ entityName, columns, idField }) {
                     </tr>
                 </thead>
                 <tbody>
-                    {items.map(item => (
-                        <tr key={generateRowKey(item, columns)}>
+                    {items.map((item, index) => (
+                        <tr key={`${item[idField] ?? 'noid'}_${index}`}>
                             {columns.map(col => (
-                                <td key={col}>
-                                    {editingItem && generateRowKey(editingItem, columns) === generateRowKey(item, columns) ? (
-                                        col === 'isAnonymous' || col === 'active' ? (
+                                <td key={`${col}_${item[idField] ?? 'noid'}_${index}`}>
+                                    {editingItem && (editingItem[idField] === item[idField]) ? (
+                                        col.toLowerCase() === 'isanonymous' || col.toLowerCase() === 'active' ? (
                                             <input
                                                 type="checkbox"
                                                 name={col}
@@ -117,7 +116,7 @@ export default function TableManager({ entityName, columns, idField }) {
                                 </td>
                             ))}
                             <td>
-                                {editingItem && generateRowKey(editingItem, columns) === generateRowKey(item, columns) ? (
+                                {editingItem && (editingItem[idField] === item[idField]) ? (
                                     <>
                                         <button
                                             className="btn btn-sm btn-success me-2"
@@ -146,7 +145,7 @@ export default function TableManager({ entityName, columns, idField }) {
                                         <button
                                             className="btn btn-sm btn-danger"
                                             style={{ fontSize: '0.75rem', padding: '0.15rem 0.4rem' }}
-                                            onClick={() => handleDelete(item[idField] || generateRowKey(item, columns))}
+                                            onClick={() => handleDelete(item[idField] || `item_${index}`)}
                                         >
                                             Delete
                                         </button>
@@ -160,7 +159,7 @@ export default function TableManager({ entityName, columns, idField }) {
                     <tr>
                         {columns.map(col => (
                             <td key={col}>
-                                {col === 'isAnonymous' || col === 'active' ? (
+                                {col.toLowerCase() === 'isanonymous' || col.toLowerCase() === 'active' ? (
                                     <input
                                         type="checkbox"
                                         name={col}
